@@ -18,15 +18,29 @@ require_relative '../lib/secret_diary'
 ### WARNING ###
 
 RSpec.describe SecretDiary do
+  let(:diary) { SecretDiary.new("Hi") }
   context "when locked" do
-    pending "refuses to be read"
+    it "refuses to be read" do
+      expect(diary.read).to eq("Go away!")
+    end
 
-    pending "refuses to be written"
+    it "refuses to be written" do
+      # meant to double the message?
+      expect(diary.write("Hi")).to eq("Go away!")
+    end
   end
 
   context "when unlocked" do
-    pending "gets read"
+    before do
+      diary.instance_variable_set(:@unlocked, true)
+    end
+    it "gets read" do
+      expect(diary.read)
+    end
 
     pending "gets written"
+    # expect a change within diary
   end
 end
+
+# write and read seem recursive in nature? - @diary does not have a @diary
