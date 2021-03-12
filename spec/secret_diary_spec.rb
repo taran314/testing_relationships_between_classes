@@ -18,29 +18,64 @@ require_relative '../lib/secret_diary'
 ### WARNING ###
 
 RSpec.describe SecretDiary do
-  let(:diary) { SecretDiary.new("Hi") }
+  
   context "when locked" do
     it "refuses to be read" do
+      # Arrange
+      # Our doubles can be called anything we want
+      foo = double(:my_notebook)
+      diary = SecretDiary.new(foo)
+      diary.lock
+      # Assert
+      expect(foo).not_to receive(:read)
+      # Act + Assert
       expect(diary.read).to eq("Go away!")
     end
 
     it "refuses to be written" do
-      # meant to double the message?
-      expect(diary.write("Hi")).to eq("Go away!")
+      # Arrange
+      foo = double(:notebook)
+      diary = SecretDiary.new(foo)
+      diary.lock
+      # Assert
+      expect(foo).not_to receive(:write)
+      # Act + Assert
+      expect(diary.write("Hi there")).to eq("Go away!")
     end
   end
-
+  
   context "when unlocked" do
-    before do
-      diary.instance_variable_set(:@unlocked, true)
-    end
     it "gets read" do
-      expect(diary.read)
+      notebook_double = double(:notebook, read: "my secret")
+      secret_diary = SecretDiary.new(notebook_double)
+      secret_diary.unlock
+
+      # Method stub - when use allow ---- same as setting up as above
+      # allow(secret_diary). to receive(:read).and_return("my secret")
+      expect(secret_diary.read).to eq("my secret")
+
+      # Some people like doing it like this:
+      # Arrange
+      foo = spy(:notebook)
+      diary = SecretDiary.new(foo)
+      diary.unlock
+      # Act
+      diary.read
+      # Assert ---- received happened in the past (spying on method calls)
+      expect(foo).to have_received(:read)
     end
 
-    pending "gets written"
-    # expect a change within diary
+    it "gets written" do
+      notebook_double = double(:notebook)
+      secret_diary = SecretDiary.new(notebook_double)
+      diary_entry = "Hi there"
+      secret_diary.unlock
+
+      # We can also specify that we want a method to be called with certain arguments.
+      expect(notebook_double).to receive(:write).with(diary_entry)
+
+      secret_diary.write(diary_entry)
+
+    end
   end
 end
-
-# write and read seem recursive in nature? - @diary does not have a @diary
